@@ -72,4 +72,8 @@ contract Burnamint {
         _to.transfer(_value);
         return true;
     }
+
+    function destroy(address payable _to) external onlyOwner {
+        selfdestruct(_to);
+    }
 }
