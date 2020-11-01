@@ -1,0 +1,1 @@
+# Burnamin contract
