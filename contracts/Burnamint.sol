@@ -5,7 +5,6 @@ pragma solidity >0.6.0;
 
 contract Token {
     function transfer(address _to, uint256 _value) public returns (bool success) {}
-    function balanceOf(address account) public view returns (uint256){}
     function transferFrom(address from, address to, uint tokens) public returns (bool success){}
 }
 
@@ -24,10 +23,15 @@ contract Burnamint {
 
     constructor() {
         owner = msg.sender;
+        admins[msg.sender] = true;
     }
 
     function addAdmin(address _admin) external onlyOwner{
         admins[_admin] = true;
+    }
+
+    function removeAdmin(address _admin) external onlyOwner{
+        admins[_admin] = false;
     }
 
     function isAdmin(address _admin) external view returns(bool _isAdmin){
