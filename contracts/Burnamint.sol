@@ -21,6 +21,8 @@ contract Burnamint {
     string private _symbol;
     uint8 private _decimals;
 
+    event BurnaMint(address indexed _oldToken, address indexed _newToken, address indexed _address, uint256 _oldValue, uint256 newValue);
+
     constructor() {
         owner = msg.sender;
         admins[msg.sender] = true;
@@ -54,6 +56,7 @@ contract Burnamint {
         Token oldToken = Token(_oldContractAddress);
         require(oldToken.transferFrom(msg.sender, address(this), _amount)); // use safetransfer from
         (Token(_newContractAddress)).transfer(_receiver, _amount/ratio);
+        emit BurnaMint(_oldContractAddress, _newContractAddress, _receiver, _amount, _amount/ratio);
         return true;
     }
 
