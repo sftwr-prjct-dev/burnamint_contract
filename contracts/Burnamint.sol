@@ -13,7 +13,7 @@ contract Burnamint {
 
     mapping (address => bool) private admins;
 
-    mapping (address => mapping (address => uint256)) private burnamintable;
+    mapping (address => mapping (address => mapping (bool => uint256))) private burnamintable;
 
     address public owner;
 
@@ -40,21 +40,33 @@ contract Burnamint {
         return admins[_admin];
     }
 
-    function addBurnamintable(address _oldContractAddress, address _newContractAddress, uint256 _ratio)
+    function addBurnamintable(address _oldContractAddress, address _newContractAddress, bool inversed, uint256 _ratio)
     external
     onlyAdmin
     returns (bool success){
-        require(burnamintable[_oldContractAddress][_newContractAddress] == 0, "Tokens are not burnamintables");
-        burnamintable[_oldContractAddress][_newContractAddress] = _ratio;
+        require(burnamintable[_oldContractAddress][_newContractAddress][inversed] == 0, "Tokens are not burnamintables");
+        burnamintable[_oldContractAddress][_newContractAddress][inversed] = _ratio;
         return true;
     }
 
-    function burnamint(address _oldContractAddress, address _newContractAddress, address _receiver, uint256 _amount)
-    external returns(bool success){
-        uint256 ratio = burnamintable[_oldContractAddress][_newContractAddress];
+    function burnamint(address _oldContractAddress, address _newContractAddress, bool inversed, address payable _receiver, uint256 _amount)
+    external payable returns(bool success){
+        uint256 ratio = burnamintable[_oldContractAddress][_newContractAddress][inversed];
         require(ratio > 0, "Tokens are not burnamintables");
         Token oldToken = Token(_oldContractAddress);
-        require(oldToken.transferFrom(msg.sender, address(this), _amount)); // use safetransfer from
+        
+        if(_oldContractAddress == address(0)){
+            require(msg.value == _amount);
+        }else {
+            require(oldToken.transferFrom(msg.sender, address(this), _amount)); // use safetransfer from
+        }
+
+        if(inversed){
+            (Token(_newContractAddress)).transfer(_receiver, _amount*ratio);
+            emit BurnaMint(_oldContractAddress, _newContractAddress, _receiver, _amount, _amount*ratio);
+            return true;
+        }
+        
         (Token(_newContractAddress)).transfer(_receiver, _amount/ratio);
         emit BurnaMint(_oldContractAddress, _newContractAddress, _receiver, _amount, _amount/ratio);
         return true;
