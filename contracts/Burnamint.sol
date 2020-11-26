@@ -48,6 +48,14 @@ contract Burnamint {
         burnamintable[_oldContractAddress][_newContractAddress][inversed] = _ratio;
         return true;
     }
+    
+    function resetBurnamintable(address _oldContractAddress, address _newContractAddress, bool inversed, uint256 _ratio)
+    external
+    onlyOwner
+    returns (bool success){
+        burnamintable[_oldContractAddress][_newContractAddress][inversed] = _ratio;
+        return true;
+    }
 
     function burnamint(address _oldContractAddress, address _newContractAddress, bool inversed, address payable _receiver, uint256 _amount)
     external payable returns(bool success){
