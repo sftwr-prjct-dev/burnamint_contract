@@ -69,8 +69,8 @@ contract Burnamint {
         }else {
             require(oldToken.transferFrom(msg.sender, address(this), _amount)); // use safetransfer from
         }
-        uint256 oldTokenDecimals;
-        uint256 newTokenDecimals;
+        uint256 oldTokenDecimals = getTokenDecimals(_oldContractAddress);
+        uint256 newTokenDecimals = getTokenDecimals(_newContractAddress);
         uint256 _value = _amount * 10**(newTokenDecimals+18-oldTokenDecimals);
         if(inversed){
             uint256 value0 = (_value*ratio)/10**18;
