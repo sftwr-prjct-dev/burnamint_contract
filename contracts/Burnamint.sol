@@ -6,6 +6,7 @@ pragma solidity >0.6.0;
 contract Token {
     function transfer(address _to, uint256 _value) public returns (bool success) {}
     function transferFrom(address from, address to, uint tokens) public returns (bool success){}
+    function decimals() public view returns (uint8){}
 }
 
 
@@ -68,15 +69,18 @@ contract Burnamint {
         }else {
             require(oldToken.transferFrom(msg.sender, address(this), _amount)); // use safetransfer from
         }
-
+        uint256 oldTokenDecimals;
+        uint256 newTokenDecimals;
+        uint256 _value = _amount * 10**(newTokenDecimals+18-oldTokenDecimals);
         if(inversed){
-            (Token(_newContractAddress)).transfer(_receiver, _amount*ratio);
-            emit BurnaMint(_oldContractAddress, _newContractAddress, _receiver, _amount, _amount*ratio);
+            uint256 value0 = (_value*ratio)/10**18;
+            (Token(_newContractAddress)).transfer(_receiver, value0);
+            emit BurnaMint(_oldContractAddress, _newContractAddress, _receiver, _amount, value0);
             return true;
         }
-        
-        (Token(_newContractAddress)).transfer(_receiver, _amount/ratio);
-        emit BurnaMint(_oldContractAddress, _newContractAddress, _receiver, _amount, _amount/ratio);
+        uint256 value = (_value/ratio)/10**18;
+        (Token(_newContractAddress)).transfer(_receiver, value);
+        emit BurnaMint(_oldContractAddress, _newContractAddress, _receiver, _amount, value);
         return true;
     }
 
@@ -93,6 +97,13 @@ contract Burnamint {
     function withdrawToken(address _token, address _to, uint256 _value) external onlyOwner returns (bool success){
         Token(_token).transfer(_to, _value);
         return true;
+    }
+
+    function getTokenDecimals(address _token) public view returns (uint256 decimals){
+        if(_token == address(0)){
+            return 18;
+        }
+        return uint256(Token(_token).decimals());
     }
     
     function withdraw(address payable _to, uint256 _value) external onlyOwner returns (bool success){
